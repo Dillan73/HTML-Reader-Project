@@ -20,6 +20,9 @@ public class HTML_Reader25 implements ActionListener {
      //typing area
     private int WIDTH=800;
     private int HEIGHT=700;
+    String link;
+    String term;
+
 
 
     public HTML_Reader25() {
@@ -49,15 +52,16 @@ public class HTML_Reader25 implements ActionListener {
         UI.add(textAreas, BorderLayout.CENTER);
         //make the text areas in the center as a 2x1 (each one row of text
 
-        userLink = new JTextArea("Replace this text with the url you would link to use");
+        userLink = new JTextArea("Note that links can't include spaces, so any spaces in links and search terms will be removed as it will yield no results. Put your url link after the colon: ");
         userLink.setBounds(50, 5, WIDTH-100, HEIGHT-50);
         userLink.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         textAreas.add(userLink);
         // adds the user link to the text area panel
 
-        userTerm = new JTextArea("Replace this text with the search term you would like all returned links to contain");
+        userTerm = new JTextArea("Place your search term here. If you wish to find links with one of multiple search terms, separate them with a |. If you wish to find links with multiple search terms, separate them with &. Put your search term(s) after the colon: ");
         userTerm.setBounds(50, 5, WIDTH-100, HEIGHT-50);
         userTerm.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        userTerm.setLineWrap(true);
         textAreas.add(userTerm);
         // adds the user search term to the text area panel
 
@@ -87,8 +91,30 @@ public class HTML_Reader25 implements ActionListener {
         //the predefined boring stuff remains
     }
 
-    private void sumbitUI() {
+    private boolean sumbitUI() {
+        String linkText = userLink.getText();
+        String[] linkParts = linkText.split("Put your url link after the colon: ");
 
+        try {
+            link = linkParts[1];
+            link.replace(" ", "");
+        } catch (Exception e){
+            output.setText("Please do not delete the initial text and put a valid link after the colon!");
+            return false;
+        }
+        //get the link in "link"
+        String termText = userTerm.getText();
+        String[] textParts = linkText.split("Put your url link after the colon: ");
+
+        try {
+            term = textParts[1];
+            link.replace(" ", "");
+        } catch (Exception e){
+            output.setText("Please do not delete the initial text and put a valid link after the colon!");
+            return false;
+        }
+
+        return true;
     }
     private void makeMenu(){
         cut = new JMenuItem("cut");
