@@ -5,23 +5,38 @@ import javax.swing.*;
 Links:
  - https://docs.oracle.com/javase/8/docs/api/javax/swing/JTextArea.html
  - https://stackoverflow.com/questions/66440929/jtextarea-center-alignment
+ - https://stackoverflow.com/questions/6635730/how-do-i-put-html-in-a-jlabel-in-java
+ - https://stackoverflow.com/questions/20165698/java-how-to-draw-a-border-around-an-undecorated-jframe
  */
 
 public class HTML_Reader25 implements ActionListener {
     private JFrame mainFrame; //the main Panel
-    private JPanel UI; //the Panel with the User stuff
-    private JTextArea userLink; // the text area with the user's link
-    private JTextArea userTerm; // the text area with the user's search term
+    CardLayout cardLayoutMain;
+    JPanel cardMain;
+     private JPanel UImain; //the Main Card Panel with the User stuff
+      private JPanel UIlink; //the link part of the UI
+       private JLabel linkLabel; // the label for the link part
+       private JTextArea linkText; // the text are for the link part
+        String link; // the actual link string
+      private JPanel UIterm; // the term part of the UI
+       private JLabel termLabel; // the label for the term part
+       private JTextArea termText; //the text for the term part
+        String term; // the actual term string
+    //detailed outline of UI card frame
+   private JPanel outputMain; // the Main card panel with the output
+
+
     private JButton submit; // the button that will submit the user's stuff
     private JTextArea output; // the text area with the outputted links
+
     private JMenuBar mb;
     private JMenu file, edit, help;
     private JMenuItem cut, copy, paste, selectAll;
      //typing area
     private int WIDTH=800;
     private int HEIGHT=700;
-    String link;
-    String term;
+
+
 
 
 
@@ -39,47 +54,77 @@ public class HTML_Reader25 implements ActionListener {
     private void prepareGUI() {
         mainFrame = new JFrame("HTML Reader");
         mainFrame.setSize(WIDTH, HEIGHT);
-        mainFrame.setLayout(new GridLayout(2, 1));
-        //make the main frame with 2x1
+        mainFrame.setLayout(new BorderLayout());
+        //make the main frame with a border layout
 
-        JPanel UI = new JPanel();
-        UI.setLayout(new BorderLayout());
-        mainFrame.add(UI);
+        cardLayoutMain = new CardLayout();
+        cardMain = new JPanel(cardLayoutMain);
+
+        UImain = new JPanel();
+        UImain.setBorder(BorderFactory.createEmptyBorder(5,7,5,3));
+        cardMain.add(UImain, "Main UI");
+        //make the main UI as one option in the card layout
+
+        outputMain = new JPanel();
+        cardMain.add(outputMain, "Main Output");
+        //make the main output as the other card option
+
+        cardLayoutMain.first(cardMain);
+        mainFrame.add(cardMain, BorderLayout.CENTER);
+        //add the main card to the center of the main frame
+
+        UImain.setLayout(new GridLayout(2,1));
         //make the UI frame as a Border Layout and add to the first row of MainFrame
 
-        JPanel textAreas = new JPanel();
-        textAreas.setLayout(new GridLayout(2,1));
-        UI.add(textAreas, BorderLayout.CENTER);
-        //make the text areas in the center as a 2x1 (each one row of text
+        UIlink = new JPanel();
+        UIlink.setLayout(new BorderLayout());
+        UImain.add(UIlink);
+        //UIlink.setBorder(BorderFactory.createEmptyBorder(6,6,3,6));
+        // Link part of UI as border layout in first row of main UI card
 
-        userLink = new JTextArea("Note that links can't include spaces, so any spaces in links and search terms will be removed as it will yield no results. Put your url link after the colon: ");
-        userLink.setBounds(50, 5, WIDTH-100, HEIGHT-50);
-        userLink.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        textAreas.add(userLink);
-        // adds the user link to the text area panel
+        UIterm = new JPanel();
+        UIterm.setLayout(new BorderLayout());
+        UImain.add(UIterm);
+        //UIterm.setBorder(BorderFactory.createEmptyBorder(3,6,6,6));
+        //add the UIterm panel as a border layout in the second row of the main UI card
 
-        userTerm = new JTextArea("Place your search term here. If you wish to find links with one of multiple search terms, separate them with a |. If you wish to find links with multiple search terms, separate them with &. Put your search term(s) after the colon: ");
-        userTerm.setBounds(50, 5, WIDTH-100, HEIGHT-50);
-        userTerm.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        userTerm.setLineWrap(true);
-        textAreas.add(userTerm);
-        // adds the user search term to the text area panel
 
-        submit = new JButton("  Submit  ");
+        linkLabel = new JLabel("<html>This text box is where your link goes. Note that any spaces you add will be ignored as links can't have spaces. Input your link here: </html>", JLabel.CENTER);
+        UIlink.add(linkLabel, BorderLayout.NORTH);
+        //linkLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        //add the label for the links to the link part of the main card
+
+        linkText = new JTextArea("");
+        UIlink.add(linkText);
+        linkText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        //add the linkText to the link part of the main card
+
+        termLabel = new JLabel("<html>This text box is how to narrow down to only the links you want with search terms. If there are multiple terms that a link should include, separate each with a single ampersand. For example, Donald&Trump would return only links with both Donald and Trump. Input search terms here: </html>", JLabel.CENTER);
+        UIterm.add(termLabel, BorderLayout.NORTH);
+        //termLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        //add the term label to the term part of the main UI card
+
+        termText = new JTextArea("");
+        termText.setLineWrap(true);
+        UIterm.add(termText);
+        termText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        // adds the user term text to the term part of the main UI card
+
+        submit = new JButton("  Press to see your links!  ");
         submit.setActionCommand("Submit");
         submit.addActionListener(new ButtonClickListener());
-        submit.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        UI.add(submit, BorderLayout.EAST);
+        //submit.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        mainFrame.add(submit, BorderLayout.EAST);
         // adds the submit button to the right of the user interface area
 
-        output = new JTextArea("After filling out the link and search term, clicking submit will make the links appear here!");
-        output.setBounds(50, 5, WIDTH-100, HEIGHT-50);
-        output.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        mainFrame.add(output);
+//        output = new JTextArea("After filling out the link and search term, clicking submit will make the links appear here!");
+//        output.setBounds(50, 5, WIDTH-100, HEIGHT-50);
+//        output.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+//        mainFrame.add(output);
         //Add the output text area to the mainFrame
 
-        makeMenu();
-        //call the predefined example menu for now
+        //makeMenu();
+        //DO NOT CREATE A MENU RIGHT NOW
 
 
         mainFrame.addWindowListener(new WindowAdapter() {
@@ -92,23 +137,20 @@ public class HTML_Reader25 implements ActionListener {
     }
 
     private boolean sumbitUI() {
-        String linkText = userLink.getText();
-        String[] linkParts = linkText.split("Put your url link after the colon: ");
+        String link = linkText.getText();
 
         try {
-            link = linkParts[1];
-            link.replace(" ", "");
+            link = link.replace(" ", "");
         } catch (Exception e){
             output.setText("Please do not delete the initial text and put a valid link after the colon!");
             return false;
         }
         //get the link in "link"
-        String termText = userTerm.getText();
-        String[] textParts = linkText.split("Put your url link after the colon: ");
+
+        String term = termText.getText();
 
         try {
-            term = textParts[1];
-            link.replace(" ", "");
+            term = term.replace(" ", "");
         } catch (Exception e){
             output.setText("Please do not delete the initial text and put a valid link after the colon!");
             return false;
