@@ -24,10 +24,11 @@ public class HTML_Reader25 implements ActionListener {
         String term; // the actual term string
     //detailed outline of UI card frame
    private JPanel outputMain; // the Main card panel with the output
+    private JTextArea outputText; // the text area with the outputted links
 
 
-    private JButton submit; // the button that will submit the user's stuff
-    private JTextArea output; // the text area with the outputted links
+   private JButton submit; // the button that will submit the user's stuff
+    boolean UI = true;
 
     private JMenuBar mb;
     private JMenu file, edit, help;
@@ -64,10 +65,6 @@ public class HTML_Reader25 implements ActionListener {
         UImain.setBorder(BorderFactory.createEmptyBorder(5,7,5,3));
         cardMain.add(UImain, "Main UI");
         //make the main UI as one option in the card layout
-
-        outputMain = new JPanel();
-        cardMain.add(outputMain, "Main Output");
-        //make the main output as the other card option
 
         cardLayoutMain.first(cardMain);
         mainFrame.add(cardMain, BorderLayout.CENTER);
@@ -110,18 +107,21 @@ public class HTML_Reader25 implements ActionListener {
         termText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         // adds the user term text to the term part of the main UI card
 
+        outputMain = new JPanel();
+        outputMain.setLayout(new BorderLayout());
+        cardMain.add(outputMain, "Main Output");
+        //make the main output as the other card option
+
+        outputText = new JTextArea(" ");
+        outputMain.add(outputText);
+
         submit = new JButton("  Press to see your links!  ");
         submit.setActionCommand("Submit");
+        submit.addActionListener(e -> cardLayoutMain.next(cardMain));
         submit.addActionListener(new ButtonClickListener());
         //submit.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
         mainFrame.add(submit, BorderLayout.EAST);
         // adds the submit button to the right of the user interface area
-
-//        output = new JTextArea("After filling out the link and search term, clicking submit will make the links appear here!");
-//        output.setBounds(50, 5, WIDTH-100, HEIGHT-50);
-//        output.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-//        mainFrame.add(output);
-        //Add the output text area to the mainFrame
 
         //makeMenu();
         //DO NOT CREATE A MENU RIGHT NOW
@@ -137,26 +137,34 @@ public class HTML_Reader25 implements ActionListener {
     }
 
     private boolean sumbitUI() {
-        String link = linkText.getText();
+        if(UI) {
+            String link = linkText.getText();
 
-        try {
-            link = link.replace(" ", "");
-        } catch (Exception e){
-            output.setText("Please do not delete the initial text and put a valid link after the colon!");
-            return false;
+            try {
+                link = link.replace(" ", "");
+            } catch (Exception e) {
+                linkText.setText("Please do not delete the initial text and put a valid link after the colon!");
+                return false;
+            }
+            //get the link in "link"
+
+            String term = termText.getText();
+
+            try {
+                term = term.replace(" ", "");
+            } catch (Exception e) {
+                termText.setText("Please do not delete the initial text and put a valid link after the colon!");
+                return false;
+            }
+            submit.setText("  Reset  ");
+            UI = false;
+            return true;
         }
-        //get the link in "link"
-
-        String term = termText.getText();
-
-        try {
-            term = term.replace(" ", "");
-        } catch (Exception e){
-            output.setText("Please do not delete the initial text and put a valid link after the colon!");
-            return false;
-        }
-
+        submit.setText("  Press to see your links!  ");
+        UI = true;
         return true;
+
+
     }
     private void makeMenu(){
         cut = new JMenuItem("cut");
@@ -187,19 +195,6 @@ public class HTML_Reader25 implements ActionListener {
     }
 
     private void showEventDemo() {
-
-        JButton okButton = new JButton("OK");
-        JButton submitButton = new JButton("Submit");
-        JButton cancelButton = new JButton("Cancel");
-
-        okButton.setActionCommand("OK");
-        submitButton.setActionCommand("Submit");
-        cancelButton.setActionCommand("Cancel");
-
-        okButton.addActionListener(new ButtonClickListener());
-        submitButton.addActionListener(new ButtonClickListener());
-        cancelButton.addActionListener(new ButtonClickListener());
-
 
 
         mainFrame.setVisible(true);
