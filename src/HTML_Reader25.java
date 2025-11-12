@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.*;
 /*
-Links:
+Citations:
  - https://docs.oracle.com/javase/8/docs/api/javax/swing/JTextArea.html
  - https://stackoverflow.com/questions/66440929/jtextarea-center-alignment
  - https://stackoverflow.com/questions/6635730/how-do-i-put-html-in-a-jlabel-in-java
@@ -152,7 +152,7 @@ public class HTML_Reader25 implements ActionListener {
                 linkText.setText("Please do not delete the initial text and put a valid link after the colon!");
                 return false;
             }
-            //get the link in "link"
+            //get the url in "link"
 
             String term = termText.getText();
 
@@ -162,25 +162,29 @@ public class HTML_Reader25 implements ActionListener {
                 termText.setText("Please do not delete the initial text and put a valid link after the colon!");
                 return false;
             }
+            //get the term(s)in term
 
             String[] allLinks = getLinks(link);
-            System.out.println("Initial: " + Arrays.toString(allLinks));
             if(allLinks == null){
                 linkText.setText("Please input a valid link!");
                 return false;
             }
+            //turning the url given into the links
             if(term.equals("")){
                 setOutput(allLinks);
                 System.out.println("TERM BLANK");
                 submit.setText("  Reset  ");
                 UI = false;
                 return true;
-            }else {
+            }
+            //outputting links if no search necessary
+            else {
                 String[] terms = getTerms(term);
                 if (allLinks == null) {
                     termText.setText("Please follow the formatting guidelines!");
                     return false;
                 }
+                //splitting to all the terms
                 System.out.println("Running constrain with:" +  Arrays.toString(allLinks) + " and " + Arrays.toString(terms));
                 String[] links = constrain(allLinks, terms);
                 if (links == null) {
@@ -188,7 +192,7 @@ public class HTML_Reader25 implements ActionListener {
                     return false;
                 }
                 setOutput(links);
-
+                //setting the output to be only the links with all terms
                 submit.setText("  Reset  ");
                 UI = false;
                 return true;
@@ -210,6 +214,7 @@ public class HTML_Reader25 implements ActionListener {
         if(output.equals("")){
             outputText.setText("No links match the search term(s)!");
         }
+        //taking the links and putting them into the output text area
     }
     private String[] constrain(String[] allLinks, String[] terms) {
         ArrayList<String> links= new ArrayList<>();
@@ -231,10 +236,12 @@ public class HTML_Reader25 implements ActionListener {
             constrained[i] = links.get(i);
         }
         return constrained;
+        //only returning the links with all the search terms
     }
 
     private String[] getTerms(String term) {
         return term.split("&");
+        //splitting the term into all the terms
     }
 
     String[] getLinks(String link){
@@ -252,7 +259,7 @@ public class HTML_Reader25 implements ActionListener {
                 href(line, links);
                 src(line, links);
             }
-
+            //adding all links with href and or src and or multiple to links arraylist
         }catch(Exception e){
             System.out.println("getLinks");
             return null;
@@ -262,6 +269,7 @@ public class HTML_Reader25 implements ActionListener {
             allLinks[i] = links.get(i);
         }
         return allLinks;
+        //returning all the links as an array
     }
     void href(String line, ArrayList<String> links){
         String[] parts = line.split("href=");
@@ -279,6 +287,7 @@ public class HTML_Reader25 implements ActionListener {
             String link = after.substring(0,index);
             links.add(link);
         }
+        //adding all the links with href in a line to the arraylist
     }
     void src(String line, ArrayList<String> links){
         String[] parts = line.split("src=");
@@ -296,6 +305,7 @@ public class HTML_Reader25 implements ActionListener {
             String link = after.substring(0,index);
             links.add(link);
         }
+        //adding all the links with src in a line to the arraylist
     }
     private void makeMenu(){
 //        cut = new JMenuItem("cut");
@@ -326,8 +336,6 @@ public class HTML_Reader25 implements ActionListener {
     }
 
     private void showEventDemo() {
-
-
         mainFrame.setVisible(true);
     }
 
@@ -355,6 +363,7 @@ public class HTML_Reader25 implements ActionListener {
                 boolean success = sumbitUI();
                 if(!success){
                     cardLayoutMain.next(cardMain);
+                    //making a failed run stay on the input page
                 }
             }
         }
