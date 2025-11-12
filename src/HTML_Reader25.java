@@ -164,13 +164,14 @@ public class HTML_Reader25 implements ActionListener {
             }
 
             String[] allLinks = getLinks(link);
+            System.out.println("Initial: " + Arrays.toString(allLinks));
             if(allLinks == null){
                 linkText.setText("Please input a valid link!");
                 return false;
             }
             if(term.equals("")){
                 setOutput(allLinks);
-
+                System.out.println("TERM BLANK");
                 submit.setText("  Reset  ");
                 UI = false;
                 return true;
@@ -180,6 +181,7 @@ public class HTML_Reader25 implements ActionListener {
                     termText.setText("Please follow the formatting guidelines!");
                     return false;
                 }
+                System.out.println("Running constrain with:" +  Arrays.toString(allLinks) + " and " + Arrays.toString(terms));
                 String[] links = constrain(allLinks, terms);
                 if (links == null) {
                     linkText.setText("Please input a valid link!");
@@ -203,8 +205,11 @@ public class HTML_Reader25 implements ActionListener {
         for(String link: links){
             output = output + link + "\n";
         }
+
         outputText.setText(output);
-        System.out.println("output: " +output);
+        if(output.equals("")){
+            outputText.setText("No links match the search term(s)!");
+        }
     }
     private String[] constrain(String[] allLinks, String[] terms) {
         ArrayList<String> links= new ArrayList<>();
@@ -215,6 +220,7 @@ public class HTML_Reader25 implements ActionListener {
                     contains = false;
                     break;
                 }
+
             }
             if(contains){
                 links.add(link);
@@ -222,7 +228,7 @@ public class HTML_Reader25 implements ActionListener {
         }
         String[] constrained = new String[links.size()];
         for(int i = 0; i < links.size(); i++){
-            allLinks[i] = links.get(i);
+            constrained[i] = links.get(i);
         }
         return constrained;
     }
@@ -243,8 +249,7 @@ public class HTML_Reader25 implements ActionListener {
             );
             String line;
             while ( (line = reader.readLine()) != null ) {
-                System.out.println(line);
-                //href(line, links);
+                href(line, links);
                 src(line, links);
             }
 
