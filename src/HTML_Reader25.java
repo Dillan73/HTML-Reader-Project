@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.TreeSet;
 import javax.swing.*;
 
 // IDEAS:
@@ -20,9 +22,6 @@ import javax.swing.*;
   - not operator
      - add to getTerms and getLinks? Change display text
      - Interest: 3/10 Time: 7/10
-  - clear button
-     - Add to prepare GUI and buttonClickListener
-     - Interest: 3/10 Time: 1/10
 
   */
 
@@ -115,7 +114,7 @@ public class HTML_Reader25 implements ActionListener {
         //add the UIterm panel as a border layout in the second row of the main UI card
 
 
-        linkLabel = new JLabel("<html>Input the url(s) that you want to find common read links between. Enter the urls separated by ampersands (&), and links found in all of the urls will be returned. You may also find the links of just one url by entering it by itself: </html>", JLabel.CENTER);
+        linkLabel = new JLabel("<html>Input the url that's links you want outputted. If you want to find links found through multiple urls, separate each url with a ^, and links found in all of the urls will be returned. For example: https://en.wikipedia.org/wiki/Donald_Trump^https://en.wikipedia.org/wiki/Joe_Biden </html>", JLabel.CENTER);
         UIlink.add(linkLabel, BorderLayout.NORTH);
         //linkLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the label for the links to the link part of the main card
@@ -125,7 +124,7 @@ public class HTML_Reader25 implements ActionListener {
         linkText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the linkText to the link part of the main card
 
-        termLabel = new JLabel("<html>This text box is to narrow down the links to only ones you desire. While you can leave this blank to output all links, input any words or terms you would like links to include, separated with an ampersand (Donald&Trump would return only links that contain Donald and Trump) to narrow down the outputted links to only what you care about: </html>", JLabel.CENTER);
+        termLabel = new JLabel("<html>This text box is to narrow down the links to only ones you desire. While you can leave this blank to output all links, input any term you would all outputted links to include. If you would like to constrain with multiple terms, again separate with ^. Also, an ! before the term will constrain to links without the term. For example, Donald^Trump^!Biden would return only links with Donald and Trump, but not Biden </html>", JLabel.CENTER);
         UIterm.add(termLabel, BorderLayout.NORTH);
         //termLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the term label to the term part of the main UI card
@@ -191,7 +190,7 @@ public class HTML_Reader25 implements ActionListener {
     private class ButtonClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
-            System.out.println("Making it to BCL");
+            //System.out.println("Making it to BCL");
 
             if (command.equals("Submit")) {
                 boolean success = sumbitUI();
@@ -202,6 +201,7 @@ public class HTML_Reader25 implements ActionListener {
             }
             if (command.equals("Reset")) {
                 System.out.println("Reset Works");
+                outputText.setText("");
             }
             if (command.equals("Clear")) {
                 System.out.println("Making it to BCL If");
@@ -214,7 +214,7 @@ public class HTML_Reader25 implements ActionListener {
     //Call all the inner-working functions to create functionality in order
     private boolean sumbitUI() {
         if(UI) {
-            String url = linkText.getText().replace(" ", "");
+            String url = linkText.getText().replace(" ", "").toLowerCase();
             //the link's text area's text reformatted
 
             String term = termText.getText().replace(" ", "").toLowerCase();
@@ -251,29 +251,24 @@ public class HTML_Reader25 implements ActionListener {
                 setOutput(links);
                 //setting the output to be only the links with all terms
             }
-            submit.setText("  Reset  ");
-        } else {
-            submit.setText("  Press to see your links!  ");
+
         }
-        UI = !UI;
         return true;
     }
 
     //turns link text to the links
     private String[] getLinks(String link) {
-        return link.split("&");
+        return link.split("\\^");
     }
 
     //turn the urls into a array of links found from each url (intersection)
     String[] readUrls(String[] urls){
-        if(urls == null || urls.length == 0){
+        if(urls == null || urls.length == 0 || urls[0] == null || urls[0].equals("")){
             return null;
         }
         ArrayList<String> links = new ArrayList<>();
         String[] firstLinks = readUrl(urls[0]);
-        for(String firstLink : firstLinks){
-            links.add(firstLink);
-        }
+        Collections.addAll(links, firstLinks);
         //create the initial arraylist with the with url's links
         for(String link:urls){
             ArrayList<String> tempList = new ArrayList<>();
@@ -366,21 +361,33 @@ public class HTML_Reader25 implements ActionListener {
 
     //turns term text to the term guidelines
     private String[] getTerms(String term) {
-        return term.split("&");
+        return term.split("\\^");
         //turns term text to the term guidelines
     }
 
     //Takes all the links and the terms and makes one list of valid links
     private String[] constrain(String[] allLinks, String[] terms) {
+        System.out.println(Arrays.toString(terms));
         ArrayList<String> links= new ArrayList<>();
         for(String link : allLinks){
             //for each link ....
             boolean contains = true;
             for(String term : terms){
-                if(!link.contains(term)){
-                    contains = false;
-                    break;
+
+                if(term.charAt(0) == '!'){
+                    if(link.contains(term.substring(1))){
+                        contains = false;
+                        System.out.println("Has !" + link+ term + contains);
+                        break;
+                    }
+                }else{
+                    if(!link.contains(term)) {
+                        contains = false;
+                        System.out.println(link + term + contains);
+                        break;
+                    }
                 }
+
 
             }
             if(contains){
@@ -399,7 +406,9 @@ public class HTML_Reader25 implements ActionListener {
     //sets the output with the links given
     void setOutput(String[] links){
         String output = "";
-        for(String link: links){
+        TreeSet<String> outputting = new TreeSet<>();
+        outputting.addAll(Arrays.asList(links));
+        for(String link: outputting){
             output = output + link + "\n";
         }
 
