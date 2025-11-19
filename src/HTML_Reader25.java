@@ -10,7 +10,24 @@ import java.util.Arrays;
 import javax.swing.*;
 
 // IDEAS:
-/* depth, and operator, or operator, not operator, clear button */
+/*
+  - depth
+     - replace most of body of submit UI with function call, that function uses recursion
+     - Interest: 8/10 Time: 9/10
+  - and operator fix for links
+     - fix getLinks? Change display text
+     - Interest: 5/10 Time: 3/10
+  - or operator
+     - add to getTerms and getLinks? Change display text
+     - Interest: 4/10 Time: 7/10
+  - not operator
+     - add to getTerms and getLinks? Change display text
+     - Interest: 3/10 Time: 7/10
+  - clear button
+     - Add to prepare GUI and buttonClickListener
+     - Interest: 3/10 Time: 1/10
+
+  */
 
 //Citations
 /*
@@ -62,7 +79,7 @@ public class HTML_Reader25 implements ActionListener {
         prepareGUI();
     }
 
-    //Creates the GUI and calls submit UI when submit/reset is pressed
+    //Creates the GUI and has the submit button have an ActionListener
     private void prepareGUI() {
         mainFrame = new JFrame("The URL-link-getter!");
         mainFrame.setSize(WIDTH, HEIGHT);
@@ -148,6 +165,21 @@ public class HTML_Reader25 implements ActionListener {
         //the predefined boring stuff remains
     }
 
+    //Has the submit button call submitUI
+    private class ButtonClickListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String command = e.getActionCommand();
+
+            if (command.equals("Submit")) {
+                boolean success = sumbitUI();
+                if(!success){
+                    cardLayoutMain.next(cardMain);
+                    //making a failed run stay on the input page
+                }
+            }
+        }
+    }
+
     //Call all the inner-working functions to create functionality in order
     private boolean sumbitUI() {
         if(UI) {
@@ -169,7 +201,7 @@ public class HTML_Reader25 implements ActionListener {
 
             if(term.equals("")){
                 setOutput(allLinks);
-                System.out.println("TERM BLANK");
+                //System.out.println("TERM BLANK");
 
             } //outputting links if no search through terms is necessary to save time
             else {
@@ -216,7 +248,7 @@ public class HTML_Reader25 implements ActionListener {
                 }
                 //adding all links with href and or src and or multiple to links arraylist
             }catch(Exception e){
-                System.out.println("getLinks");
+                //System.out.println("getLinks");
                 return null;
             }
         }
@@ -302,7 +334,6 @@ public class HTML_Reader25 implements ActionListener {
     //sets the output with the links given
     void setOutput(String[] links){
         String output = "";
-        System.out.println("links: " + Arrays.toString(links));
         for(String link: links){
             output = output + link + "\n";
         }
@@ -314,7 +345,27 @@ public class HTML_Reader25 implements ActionListener {
         //taking the links and putting them into the output text area with proper formatting
     }
 
-    //Makes the menu
+    //Makes the main frame visible
+    private void showEventDemo() {
+        mainFrame.setVisible(true);
+    }
+
+    //default action performed and make menu code
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == cut) {
+            linkText.cut();
+        }
+        if (e.getSource() == paste){
+            linkText.paste();
+        }
+        if (e.getSource() == copy){
+            linkText.copy();
+        }
+        if (e.getSource() == selectAll){
+            linkText.selectAll();
+        }
+    }
     private void makeMenu(){
         cut = new JMenuItem("cut");
         copy = new JMenuItem("copy");
@@ -342,41 +393,4 @@ public class HTML_Reader25 implements ActionListener {
         mainFrame.add(mb);
         mainFrame.setJMenuBar(mb);
     }
-
-    //Makes the main frame visible
-    private void showEventDemo() {
-        mainFrame.setVisible(true);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == cut) {
-            linkText.cut();
-        }
-        if (e.getSource() == paste){
-            //ta.paste();
-        }
-        if (e.getSource() == copy){
-            //ta.copy();
-        }
-        if (e.getSource() == selectAll){
-            //ta.selectAll();
-        }
-    }
-
-    private class ButtonClickListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            String command = e.getActionCommand();
-
-            if (command.equals("Submit")) {
-                boolean success = sumbitUI();
-                if(!success){
-                    cardLayoutMain.next(cardMain);
-                    //making a failed run stay on the input page
-                }
-            }
-        }
-    }
-
-
 }
