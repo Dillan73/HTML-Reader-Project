@@ -14,11 +14,11 @@ import javax.swing.*;
 //Citations
 /*
 Citations:
- - https://docs.oracle.com/javase/8/docs/api/javax/swing/JTextArea.html
- - https://stackoverflow.com/questions/66440929/jtextarea-center-alignment
- - https://stackoverflow.com/questions/6635730/how-do-i-put-html-in-a-jlabel-in-java
- - https://stackoverflow.com/questions/20165698/java-how-to-draw-a-border-around-an-undecorated-jframe
- - https://docs.oracle.com/javase/8/docs/api/javax/swing/JScrollPane.html
+ - https://docs.oracle.com/javase/8/docs/api/javax/swing/JTextArea.html (set and get text)
+ - https://stackoverflow.com/questions/66440929/jtextarea-center-alignment (aligning my text)
+ - https://stackoverflow.com/questions/6635730/how-do-i-put-html-in-a-jlabel-in-java (formatting my text guidelines)
+ - https://stackoverflow.com/questions/20165698/java-how-to-draw-a-border-around-an-undecorated-jframe (Borders between different frames)
+ - https://docs.oracle.com/javase/8/docs/api/javax/swing/JScrollPane.html (Adding scrollability in text areas)
  */
 //https://en.wikipedia.org/wiki/Donald_Trump%5E^https://en.wikipedia.org/wiki/Joe_Biden
 
