@@ -260,6 +260,9 @@ public class HTML_Reader25 implements ActionListener {
         }
         ArrayList<String> links = new ArrayList<>();
         String[] firstLinks = readUrl(urls[0]);
+        if(links == null || firstLinks == null){
+            return null;
+        }
         Collections.addAll(links, firstLinks);
         //create the initial arraylist with the with url's links
         for(String link:urls){
