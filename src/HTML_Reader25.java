@@ -1,3 +1,4 @@
+//imports
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -7,6 +8,11 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.*;
+
+// IDEAS:
+/* depth, and operator, or operator, not operator, clear button */
+
+//Citations
 /*
 Citations:
  - https://docs.oracle.com/javase/8/docs/api/javax/swing/JTextArea.html
@@ -16,6 +22,7 @@ Citations:
  */
 
 public class HTML_Reader25 implements ActionListener {
+//variables
     private JFrame mainFrame; //the main Panel
     CardLayout cardLayoutMain;
     JPanel cardMain;
@@ -39,27 +46,25 @@ public class HTML_Reader25 implements ActionListener {
     private JMenuBar mb;
     private JMenu file, edit, help;
     private JMenuItem cut, copy, paste, selectAll;
-     //typing area
     private int WIDTH=800;
     private int HEIGHT=700;
 
 
-
-
-
-    public HTML_Reader25() {
-        //Run the PrepareGUI to make the GUI
-        prepareGUI();
-    }
-
+    //Calls HTML_Reader25
     public static void main(String[] args) {
         //Make the GUI and show it after
         HTML_Reader25 GUI = new HTML_Reader25();
         GUI.showEventDemo();
     }
+    //calls prepare GUI
+    public HTML_Reader25() {
+        //Run the PrepareGUI to make the GUI
+        prepareGUI();
+    }
 
+    //Creates the GUI and calls submit UI when submit/reset is pressed
     private void prepareGUI() {
-        mainFrame = new JFrame("HTML Reader");
+        mainFrame = new JFrame("The URL-link-getter!");
         mainFrame.setSize(WIDTH, HEIGHT);
         mainFrame.setLayout(new BorderLayout());
         //make the main frame with a border layout
@@ -92,7 +97,7 @@ public class HTML_Reader25 implements ActionListener {
         //add the UIterm panel as a border layout in the second row of the main UI card
 
 
-        linkLabel = new JLabel("<html>This text box is where your link goes. Note that any spaces you add will be ignored as links can't have spaces. Input your link here: </html>", JLabel.CENTER);
+        linkLabel = new JLabel("<html>Input the url that's links you want to read below. Note that spaces, which aren't found in urls, will be ignored: </html>", JLabel.CENTER);
         UIlink.add(linkLabel, BorderLayout.NORTH);
         //linkLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the label for the links to the link part of the main card
@@ -102,7 +107,7 @@ public class HTML_Reader25 implements ActionListener {
         linkText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the linkText to the link part of the main card
 
-        termLabel = new JLabel("<html>This text box is how to narrow down to only the links you want with search terms. If there are multiple terms that a link should include, separate each with a single ampersand. For example, Donald&Trump would return only links with both Donald and Trump. Input search terms here: </html>", JLabel.CENTER);
+        termLabel = new JLabel("<html>This text box is to narrow down the links to only ones you desire. While you can leave this blank to output all links, input any words or terms you would like links to include, separated with an ampersand (Donald&Trump would return only links that contain Donald and Trump) to narrow down the outputted links to only what you care about: </html>", JLabel.CENTER);
         UIterm.add(termLabel, BorderLayout.NORTH);
         //termLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the term label to the term part of the main UI card
@@ -119,7 +124,8 @@ public class HTML_Reader25 implements ActionListener {
         //make the main output as the other card option
 
         outputText = new JTextArea(" ");
-        outputMain.add(outputText);
+        JScrollPane scrollOutput = new JScrollPane(outputText);
+        outputMain.add(scrollOutput);
 
         submit = new JButton("  Press to see your links!  ");
         submit.setActionCommand("Submit");
@@ -142,83 +148,136 @@ public class HTML_Reader25 implements ActionListener {
         //the predefined boring stuff remains
     }
 
+    //Call all the inner-working functions to create functionality in order
     private boolean sumbitUI() {
         if(UI) {
-            String link = linkText.getText();
+            String url = linkText.getText().replace(" ", "");
+            //the link's text area's text reformatted
 
-            try {
-                link = link.replace(" ", "");
-            } catch (Exception e) {
-                linkText.setText("Please do not delete the initial text and put a valid link after the colon!");
-                return false;
-            }
-            //get the url in "link"
+            String term = termText.getText().replace(" ", "").toLowerCase();
+            //the term's text area's text reformatted
 
-            String term = termText.getText();
-
-            try {
-                term = term.replace(" ", "");
-            } catch (Exception e) {
-                termText.setText("Please do not delete the initial text and put a valid link after the colon!");
-                return false;
-            }
-            //get the term(s)in term
-
-            String[] allLinks = getLinks(link);
+            //String link  link text;
+            String[] urls = getLinks(url);
+            String[] allLinks = readUrls(urls);
+            //turns the url(s) given into the links
             if(allLinks == null){
                 linkText.setText("Please input a valid link!");
                 return false;
             }
-            //turning the url given into the links
+            //if the user input doens't give links/is invalid lets them know
+
             if(term.equals("")){
                 setOutput(allLinks);
                 System.out.println("TERM BLANK");
-                submit.setText("  Reset  ");
-                UI = false;
-                return true;
-            }
-            //outputting links if no search necessary
+
+            } //outputting links if no search through terms is necessary to save time
             else {
                 String[] terms = getTerms(term);
-                if (allLinks == null) {
-                    termText.setText("Please follow the formatting guidelines!");
-                    return false;
-                }
                 //splitting to all the terms
-                System.out.println("Running constrain with:" +  Arrays.toString(allLinks) + " and " + Arrays.toString(terms));
                 String[] links = constrain(allLinks, terms);
                 if (links == null) {
                     linkText.setText("Please input a valid link!");
                     return false;
-                }
+                } // if the links was set to null, this was a catch
                 setOutput(links);
                 //setting the output to be only the links with all terms
-                submit.setText("  Reset  ");
-                UI = false;
-                return true;
+            }
+            submit.setText("  Reset  ");
+        } else {
+            submit.setText("  Press to see your links!  ");
+        }
+        UI = !UI;
+        return true;
+    }
+
+    //turns link text to the url guidelines
+    private String[] getLinks(String link) {
+        return link.split("&");
+
+    }
+
+    //Turns the url guidelines into the links without constraining by calling href and src
+    String[] readUrls(String[] links){
+        ArrayList<String> listOfLinks= new ArrayList<>();
+        for(String link : links){
+            try{
+                URL url = new URL(link);
+                URLConnection urlc = url.openConnection();
+                urlc.setRequestProperty("User-Agent", "Mozilla 5.0 (Windows; U; " + "Windows NT 5.1; en-US; rv:1.8.0.11) ");
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(urlc.getInputStream())
+                );
+                String line;
+                while ( (line = reader.readLine()) != null ) {
+                    href(line, listOfLinks);
+                    src(line, listOfLinks);
+                }
+                //adding all links with href and or src and or multiple to links arraylist
+            }catch(Exception e){
+                System.out.println("getLinks");
+                return null;
             }
         }
-        submit.setText("  Press to see your links!  ");
-        UI = true;
-        return true;
-
+        String[] allLinks = new String[listOfLinks.size()];
+        for(int i = 0; i < listOfLinks.size(); i++){
+            allLinks[i] = listOfLinks.get(i);
+        }
+        return allLinks;
+        //converting the links to an array to return
     }
-    void setOutput(String[] links){
-        String output = "";
-        System.out.println("links: " + Arrays.toString(links));
-        for(String link: links){
-            output = output + link + "\n";
+        //Helper readUrls function that takes in a line and adds any links if the link has href to the arraylist
+        void href(String line, ArrayList<String> links){
+            //adding all the links with href in a line to the arraylist
+            String[] parts = line.split("href=");
+            for(int i = parts.length-1; i >0; i--){
+                String after = parts[i].substring(1);
+                int quoteIndex = after.indexOf("\"");
+                int apostropheIndex = after.indexOf("\'");
+                if(quoteIndex < 0){
+                    quoteIndex = after.length();
+                }
+                if(apostropheIndex < 0){
+                    apostropheIndex = after.length();
+                }
+                int index = Math.min(quoteIndex, apostropheIndex);
+                String link = after.substring(0,index);
+                links.add(link);
+            }
+        }
+        //Helper readUrls function that takes in a line and adds any links if the link has src to the arraylist
+        void src(String line, ArrayList<String> links){
+            //adding all the links with href in a line to the arraylist
+            String[] parts = line.split("src=");
+            for(int i = parts.length-1; i >0; i--){
+                String after = parts[i].substring(1);
+                int quoteIndex = after.indexOf("\"");
+                int apostropheIndex = after.indexOf("\'");
+                if(quoteIndex < 0){
+                    quoteIndex = after.length();
+                }
+                if(apostropheIndex < 0){
+                    apostropheIndex = after.length();
+                }
+                int index = Math.min(quoteIndex, apostropheIndex);
+                String link = after.substring(0,index);
+                links.add(link);
+            }
+            //adding all the links with src in a line to the arraylist
         }
 
-        outputText.setText(output);
-        if(output.equals("")){
-            outputText.setText("No links match the search term(s)!");
-        }
-        //taking the links and putting them into the output text area
+    //turns term text to the term guidelines
+    private String[] getTerms(String term) {
+        return term.split("&");
+        //turns term text to the term guidelines
     }
+
+    //Takes all the links and the terms and makes one list of valid links
     private String[] constrain(String[] allLinks, String[] terms) {
         ArrayList<String> links= new ArrayList<>();
         for(String link : allLinks){
+            //for each link ....
             boolean contains = true;
             for(String term : terms){
                 if(!link.contains(term)){
@@ -230,111 +289,61 @@ public class HTML_Reader25 implements ActionListener {
             if(contains){
                 links.add(link);
             }
+            // ... add it to the arraylist if it follows the terms restrictions
         }
         String[] constrained = new String[links.size()];
         for(int i = 0; i < links.size(); i++){
             constrained[i] = links.get(i);
         }
         return constrained;
-        //only returning the links with all the search terms
+        //reformats and returns the links with search term guidelines
     }
 
-    private String[] getTerms(String term) {
-        return term.split("&");
-        //splitting the term into all the terms
+    //sets the output with the links given
+    void setOutput(String[] links){
+        String output = "";
+        System.out.println("links: " + Arrays.toString(links));
+        for(String link: links){
+            output = output + link + "\n";
+        }
+
+        outputText.setText(output);
+        if(output.equals("")){
+            outputText.setText("No links match the search term(s)!");
+        }
+        //taking the links and putting them into the output text area with proper formatting
     }
 
-    String[] getLinks(String link){
-        ArrayList<String> links= new ArrayList<>();
-        try{
-            URL url = new URL(link);
-            URLConnection urlc = url.openConnection();
-            urlc.setRequestProperty("User-Agent", "Mozilla 5.0 (Windows; U; " + "Windows NT 5.1; en-US; rv:1.8.0.11) ");
-
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(urlc.getInputStream())
-            );
-            String line;
-            while ( (line = reader.readLine()) != null ) {
-                href(line, links);
-                src(line, links);
-            }
-            //adding all links with href and or src and or multiple to links arraylist
-        }catch(Exception e){
-            System.out.println("getLinks");
-            return null;
-        }
-        String[] allLinks = new String[links.size()];
-        for(int i = 0; i < links.size(); i++){
-            allLinks[i] = links.get(i);
-        }
-        return allLinks;
-        //returning all the links as an array
-    }
-    void href(String line, ArrayList<String> links){
-        String[] parts = line.split("href=");
-        for(int i = parts.length-1; i >0; i--){
-            String after = parts[i].substring(1);
-            int quoteIndex = after.indexOf("\"");
-            int apostropheIndex = after.indexOf("\'");
-            if(quoteIndex < 0){
-                quoteIndex = after.length();
-            }
-            if(apostropheIndex < 0){
-                apostropheIndex = after.length();
-            }
-            int index = Math.min(quoteIndex, apostropheIndex);
-            String link = after.substring(0,index);
-            links.add(link);
-        }
-        //adding all the links with href in a line to the arraylist
-    }
-    void src(String line, ArrayList<String> links){
-        String[] parts = line.split("src=");
-        for(int i = parts.length-1; i >0; i--){
-            String after = parts[i].substring(1);
-            int quoteIndex = after.indexOf("\"");
-            int apostropheIndex = after.indexOf("\'");
-            if(quoteIndex < 0){
-                quoteIndex = after.length();
-            }
-            if(apostropheIndex < 0){
-                apostropheIndex = after.length();
-            }
-            int index = Math.min(quoteIndex, apostropheIndex);
-            String link = after.substring(0,index);
-            links.add(link);
-        }
-        //adding all the links with src in a line to the arraylist
-    }
+    //Makes the menu
     private void makeMenu(){
-//        cut = new JMenuItem("cut");
-//        copy = new JMenuItem("copy");
-//        paste = new JMenuItem("paste");
-//        selectAll = new JMenuItem("selectAll");
-//        cut.addActionListener(this);
-//        copy.addActionListener(this);
-//        paste.addActionListener(this);
-//        selectAll.addActionListener(this);
-//
-//        mb = new JMenuBar();
-//        file = new JMenu("File");
-//        edit = new JMenu("Edit");
-//        help = new JMenu("Help");
-//        edit.add(cut);
-//        edit.add(copy);
-//        edit.add(paste);
-//        edit.add(selectAll);
-//        mb.add(file);
-//        mb.add(edit);
-//        mb.add(help);
-//        //end menu at top
-//
-//
-//        mainFrame.add(mb);  //add menu bar
-//        mainFrame.setJMenuBar(mb);
+        cut = new JMenuItem("cut");
+        copy = new JMenuItem("copy");
+        paste = new JMenuItem("paste");
+        selectAll = new JMenuItem("selectAll");
+        cut.addActionListener(this);
+        copy.addActionListener(this);
+        paste.addActionListener(this);
+        selectAll.addActionListener(this);
+
+        mb = new JMenuBar();
+        file = new JMenu("File");
+        edit = new JMenu("Edit");
+        help = new JMenu("Help");
+        edit.add(cut);
+        edit.add(copy);
+        edit.add(paste);
+        edit.add(selectAll);
+        mb.add(file);
+        mb.add(edit);
+        mb.add(help);
+        //end menu at top
+
+
+        mainFrame.add(mb);
+        mainFrame.setJMenuBar(mb);
     }
 
+    //Makes the main frame visible
     private void showEventDemo() {
         mainFrame.setVisible(true);
     }
@@ -342,7 +351,7 @@ public class HTML_Reader25 implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == cut) {
-            //ta.cut();
+            linkText.cut();
         }
         if (e.getSource() == paste){
             //ta.paste();
