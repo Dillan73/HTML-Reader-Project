@@ -14,9 +14,6 @@ import javax.swing.*;
   - depth
      - replace most of body of submit UI with function call, that function uses recursion
      - Interest: 8/10 Time: 9/10
-  - and operator fix for links
-     - fix getLinks? Change display text
-     - Interest: 5/10 Time: 3/10
   - or operator
      - add to getTerms and getLinks? Change display text
      - Interest: 4/10 Time: 7/10
@@ -89,9 +86,13 @@ public class HTML_Reader25 implements ActionListener {
         cardLayoutMain = new CardLayout();
         cardMain = new JPanel(cardLayoutMain);
 
+        JPanel UIFULL = new JPanel();
+        UIFULL.setLayout(new BorderLayout());
+        cardMain.add(UIFULL, "Main UI");
+
         UImain = new JPanel();
         UImain.setBorder(BorderFactory.createEmptyBorder(5,7,5,3));
-        cardMain.add(UImain, "Main UI");
+        UIFULL.add(UImain);
         //make the main UI as one option in the card layout
 
         cardLayoutMain.first(cardMain);
@@ -114,7 +115,7 @@ public class HTML_Reader25 implements ActionListener {
         //add the UIterm panel as a border layout in the second row of the main UI card
 
 
-        linkLabel = new JLabel("<html>Input the url that's links you want to read below. Note that spaces, which aren't found in urls, will be ignored: </html>", JLabel.CENTER);
+        linkLabel = new JLabel("<html>Input the url(s) that you want to find common read links between. Enter the urls separated by ampersands (&), and links found in all of the urls will be returned. You may also find the links of just one url by entering it by itself: </html>", JLabel.CENTER);
         UIlink.add(linkLabel, BorderLayout.NORTH);
         //linkLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the label for the links to the link part of the main card
@@ -135,22 +136,43 @@ public class HTML_Reader25 implements ActionListener {
         termText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         // adds the user term text to the term part of the main UI card
 
+        JPanel FullOutput = new JPanel();
+        FullOutput.setLayout(new BorderLayout());
+        cardMain.add(FullOutput, "Main Output");
+        //add the full output card
+
         outputMain = new JPanel();
         outputMain.setLayout(new BorderLayout());
-        cardMain.add(outputMain, "Main Output");
-        //make the main output as the other card option
-
         outputText = new JTextArea(" ");
         JScrollPane scrollOutput = new JScrollPane(outputText);
         outputMain.add(scrollOutput);
+        FullOutput.add(outputMain);
 
-        submit = new JButton("  Press to see your links!  ");
+        JPanel inputButtons = new JPanel();
+        inputButtons.setLayout(new BorderLayout());
+        UIFULL.add(inputButtons, BorderLayout.EAST);
+
+        submit = new JButton(" \n \n Press to see your links! \n \n ");
         submit.setActionCommand("Submit");
         submit.addActionListener(e -> cardLayoutMain.next(cardMain));
         submit.addActionListener(new ButtonClickListener());
         //submit.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-        mainFrame.add(submit, BorderLayout.EAST);
-        // adds the submit button to the right of the user interface area
+        inputButtons.add(submit, BorderLayout.SOUTH);
+        // adds the submit button to the input section
+
+        JButton clear = new JButton("Clear input fields");
+        clear.setActionCommand("Clear");
+        clear.addActionListener(new ButtonClickListener());
+        inputButtons.add(clear);
+        // adds the clear button to the input section with an action listener
+
+        JButton reset = new JButton(" Try new inputs! ");
+        reset.setActionCommand("Reset");
+        reset.addActionListener(e -> cardLayoutMain.next(cardMain));
+        //reset.addActionListener(new ButtonClickListener());
+        //submit.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+        FullOutput.add(reset, BorderLayout.EAST);
+        //adds the reset button to the output card
 
         //makeMenu();
         //DO NOT CREATE A MENU RIGHT NOW
@@ -169,6 +191,7 @@ public class HTML_Reader25 implements ActionListener {
     private class ButtonClickListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
+            System.out.println("Making it to BCL");
 
             if (command.equals("Submit")) {
                 boolean success = sumbitUI();
@@ -176,6 +199,14 @@ public class HTML_Reader25 implements ActionListener {
                     cardLayoutMain.next(cardMain);
                     //making a failed run stay on the input page
                 }
+            }
+            if (command.equals("Reset")) {
+                System.out.println("Reset Works");
+            }
+            if (command.equals("Clear")) {
+                System.out.println("Making it to BCL If");
+                linkText.setText("");
+                termText.setText("");
             }
         }
     }
@@ -188,6 +219,11 @@ public class HTML_Reader25 implements ActionListener {
 
             String term = termText.getText().replace(" ", "").toLowerCase();
             //the term's text area's text reformatted
+
+            if(url.equals("")){
+                linkText.setText("Please add a valid link!");
+                return false;
+            }
 
             //String link  link text;
             String[] urls = getLinks(url);
@@ -223,34 +259,62 @@ public class HTML_Reader25 implements ActionListener {
         return true;
     }
 
-    //turns link text to the url guidelines
+    //turns link text to the links
     private String[] getLinks(String link) {
         return link.split("&");
-
     }
 
-    //Turns the url guidelines into the links without constraining by calling href and src
-    String[] readUrls(String[] links){
-        ArrayList<String> listOfLinks= new ArrayList<>();
-        for(String link : links){
-            try{
-                URL url = new URL(link);
-                URLConnection urlc = url.openConnection();
-                urlc.setRequestProperty("User-Agent", "Mozilla 5.0 (Windows; U; " + "Windows NT 5.1; en-US; rv:1.8.0.11) ");
-
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(urlc.getInputStream())
-                );
-                String line;
-                while ( (line = reader.readLine()) != null ) {
-                    href(line, listOfLinks);
-                    src(line, listOfLinks);
+    //turn the urls into a array of links found from each url (intersection)
+    String[] readUrls(String[] urls){
+        if(urls == null || urls.length == 0){
+            return null;
+        }
+        ArrayList<String> links = new ArrayList<>();
+        String[] firstLinks = readUrl(urls[0]);
+        for(String firstLink : firstLinks){
+            links.add(firstLink);
+        }
+        //create the initial arraylist with the with url's links
+        for(String link:urls){
+            ArrayList<String> tempList = new ArrayList<>();
+            String[] currLinks = readUrl(link);
+            for(String currLink : currLinks){
+                if(links.contains(currLink)) {
+                    tempList.add(currLink);
                 }
-                //adding all links with href and or src and or multiple to links arraylist
-            }catch(Exception e){
-                //System.out.println("getLinks");
-                return null;
             }
+            links = tempList;
+        }
+        //progressively remove links that aren't in the next url
+        String[] intersection = new String[links.size()];
+        for(int i = 0; i < links.size(); i++){
+            intersection[i] = links.get(i);
+        }
+        return intersection;
+        //return the links that are read in all urls
+    }
+
+
+    //Turns a into the links by calling href and src
+    String[] readUrl(String link){
+        ArrayList<String> listOfLinks= new ArrayList<>();
+        try{
+            URL url = new URL(link);
+            URLConnection urlc = url.openConnection();
+            urlc.setRequestProperty("User-Agent", "Mozilla 5.0 (Windows; U; " + "Windows NT 5.1; en-US; rv:1.8.0.11) ");
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(urlc.getInputStream())
+            );
+            String line;
+            while ( (line = reader.readLine()) != null ) {
+                href(line, listOfLinks);
+                src(line, listOfLinks);
+            }
+            //adding all links with href and or src and or multiple to links arraylist
+        }catch(Exception e){
+            //System.out.println("getLinks");
+            return null;
         }
         String[] allLinks = new String[listOfLinks.size()];
         for(int i = 0; i < listOfLinks.size(); i++){
@@ -259,45 +323,46 @@ public class HTML_Reader25 implements ActionListener {
         return allLinks;
         //converting the links to an array to return
     }
-        //Helper readUrls function that takes in a line and adds any links if the link has href to the arraylist
-        void href(String line, ArrayList<String> links){
-            //adding all the links with href in a line to the arraylist
-            String[] parts = line.split("href=");
-            for(int i = parts.length-1; i >0; i--){
-                String after = parts[i].substring(1);
-                int quoteIndex = after.indexOf("\"");
-                int apostropheIndex = after.indexOf("\'");
-                if(quoteIndex < 0){
-                    quoteIndex = after.length();
-                }
-                if(apostropheIndex < 0){
-                    apostropheIndex = after.length();
-                }
-                int index = Math.min(quoteIndex, apostropheIndex);
-                String link = after.substring(0,index);
-                links.add(link);
+
+    //Helper readUrls function that takes in a line and adds any links if the link has href to the arraylist
+    void href(String line, ArrayList<String> links){
+        //adding all the links with href in a line to the arraylist
+        String[] parts = line.split("href=");
+        for(int i = parts.length-1; i >0; i--){
+            String after = parts[i].substring(1);
+            int quoteIndex = after.indexOf("\"");
+            int apostropheIndex = after.indexOf("\'");
+            if(quoteIndex < 0){
+                quoteIndex = after.length();
             }
-        }
-        //Helper readUrls function that takes in a line and adds any links if the link has src to the arraylist
-        void src(String line, ArrayList<String> links){
-            //adding all the links with href in a line to the arraylist
-            String[] parts = line.split("src=");
-            for(int i = parts.length-1; i >0; i--){
-                String after = parts[i].substring(1);
-                int quoteIndex = after.indexOf("\"");
-                int apostropheIndex = after.indexOf("\'");
-                if(quoteIndex < 0){
-                    quoteIndex = after.length();
-                }
-                if(apostropheIndex < 0){
-                    apostropheIndex = after.length();
-                }
-                int index = Math.min(quoteIndex, apostropheIndex);
-                String link = after.substring(0,index);
-                links.add(link);
+            if(apostropheIndex < 0){
+                apostropheIndex = after.length();
             }
-            //adding all the links with src in a line to the arraylist
+            int index = Math.min(quoteIndex, apostropheIndex);
+            String link = after.substring(0,index);
+            links.add(link);
         }
+    }
+    //Helper readUrls function that takes in a line and adds any links if the link has src to the arraylist
+    void src(String line, ArrayList<String> links){
+        //adding all the links with href in a line to the arraylist
+        String[] parts = line.split("src=");
+        for(int i = parts.length-1; i >0; i--){
+            String after = parts[i].substring(1);
+            int quoteIndex = after.indexOf("\"");
+            int apostropheIndex = after.indexOf("\'");
+            if(quoteIndex < 0){
+                quoteIndex = after.length();
+            }
+            if(apostropheIndex < 0){
+                apostropheIndex = after.length();
+            }
+            int index = Math.min(quoteIndex, apostropheIndex);
+            String link = after.substring(0,index);
+            links.add(link);
+        }
+        //adding all the links with src in a line to the arraylist
+    }
 
     //turns term text to the term guidelines
     private String[] getTerms(String term) {
