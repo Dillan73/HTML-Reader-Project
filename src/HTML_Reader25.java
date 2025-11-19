@@ -11,20 +11,6 @@ import java.util.Collections;
 import java.util.TreeSet;
 import javax.swing.*;
 
-// IDEAS:
-/*
-  - depth
-     - replace most of body of submit UI with function call, that function uses recursion
-     - Interest: 8/10 Time: 9/10
-  - or operator
-     - add to getTerms and getLinks? Change display text
-     - Interest: 4/10 Time: 7/10
-  - not operator
-     - add to getTerms and getLinks? Change display text
-     - Interest: 3/10 Time: 7/10
-
-  */
-
 //Citations
 /*
 Citations:
@@ -32,7 +18,10 @@ Citations:
  - https://stackoverflow.com/questions/66440929/jtextarea-center-alignment
  - https://stackoverflow.com/questions/6635730/how-do-i-put-html-in-a-jlabel-in-java
  - https://stackoverflow.com/questions/20165698/java-how-to-draw-a-border-around-an-undecorated-jframe
+ - https://docs.oracle.com/javase/8/docs/api/javax/swing/JScrollPane.html
  */
+//https://en.wikipedia.org/wiki/Donald_Trump%5E^https://en.wikipedia.org/wiki/Joe_Biden
+
 
 public class HTML_Reader25 implements ActionListener {
 //variables
@@ -120,7 +109,9 @@ public class HTML_Reader25 implements ActionListener {
         //add the label for the links to the link part of the main card
 
         linkText = new JTextArea("");
-        UIlink.add(linkText);
+        JScrollPane scrollLink = new JScrollPane(linkText);
+        UIlink.add(scrollLink);
+        linkText.setLineWrap(true);
         linkText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         //add the linkText to the link part of the main card
 
@@ -131,7 +122,8 @@ public class HTML_Reader25 implements ActionListener {
 
         termText = new JTextArea("");
         termText.setLineWrap(true);
-        UIterm.add(termText);
+        JScrollPane scrollTerm = new JScrollPane(termText);
+        UIterm.add(scrollTerm);
         termText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         // adds the user term text to the term part of the main UI card
 
