@@ -1,4 +1,5 @@
 //imports
+import java.net.HttpURLConnection;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -20,7 +21,7 @@ Citations:
  - https://stackoverflow.com/questions/20165698/java-how-to-draw-a-border-around-an-undecorated-jframe (Borders between different frames)
  - https://docs.oracle.com/javase/8/docs/api/javax/swing/JScrollPane.html (Adding scrollability in text areas)
  */
-//https://en.wikipedia.org/wiki/Donald_Trump%5E^https://en.wikipedia.org/wiki/Joe_Biden
+//https://en.wikipedia.org/wiki/Donald_Trump^https://en.wikipedia.org/wiki/Joe_Biden
 
 
 public class HTML_Reader25 implements ActionListener {
@@ -175,6 +176,8 @@ public class HTML_Reader25 implements ActionListener {
             }
         });
         mainFrame.setVisible(true);
+
+
         //the predefined boring stuff remains
     }
 
@@ -206,9 +209,9 @@ public class HTML_Reader25 implements ActionListener {
     //Call all the inner-working functions to create functionality in order
     private boolean sumbitUI() {
         if(UI) {
-            String url = linkText.getText().replace(" ", "").toLowerCase();
+            String url = linkText.getText().replace(" ", "");
             //the link's text area's text reformatted
-
+            System.out.println("URL is: " + url);
             String term = termText.getText().replace(" ", "").toLowerCase();
             //the term's text area's text reformatted
 
@@ -217,12 +220,14 @@ public class HTML_Reader25 implements ActionListener {
                 return false;
             }
 
-            //String link  link text;
+            //String link text;
             String[] urls = getLinks(url);
+            System.out.println("urls:" + Arrays.toString(urls));
             String[] allLinks = readUrls(urls);
+            System.out.println("allLinks:" + allLinks);
             //turns the url(s) given into the links
             if(allLinks == null){
-                linkText.setText("Please input a valid link!");
+                linkText.setText("This link is invalid or has unusual formatting, please try again!");
                 return false;
             }
             //if the user input doens't give links/is invalid lets them know
@@ -256,16 +261,20 @@ public class HTML_Reader25 implements ActionListener {
     //turn the urls into a array of links found from each url (intersection)
     String[] readUrls(String[] urls){
         if(urls == null || urls.length == 0 || urls[0] == null || urls[0].equals("")){
+            System.out.println("null at first if");
             return null;
         }
         ArrayList<String> links = new ArrayList<>();
         String[] firstLinks = readUrl(urls[0]);
-        if(links == null || firstLinks == null){
+        System.out.println("firstLinks:" + firstLinks);
+        System.out.println(urls[0]);
+        if(firstLinks == null){
             return null;
         }
         Collections.addAll(links, firstLinks);
         //create the initial arraylist with the with url's links
         for(String link:urls){
+
             ArrayList<String> tempList = new ArrayList<>();
             String[] currLinks = readUrl(link);
             for(String currLink : currLinks){
@@ -273,7 +282,7 @@ public class HTML_Reader25 implements ActionListener {
                     tempList.add(currLink);
                 }
             }
-            links = tempList;
+            links.addAll(tempList);
         }
         //progressively remove links that aren't in the next url
         String[] intersection = new String[links.size()];
@@ -287,9 +296,11 @@ public class HTML_Reader25 implements ActionListener {
 
     //Turns a into the links by calling href and src
     String[] readUrl(String link){
+        System.out.println("link:"+link);
         ArrayList<String> listOfLinks= new ArrayList<>();
         try{
             URL url = new URL(link);
+
             URLConnection urlc = url.openConnection();
             urlc.setRequestProperty("User-Agent", "Mozilla 5.0 (Windows; U; " + "Windows NT 5.1; en-US; rv:1.8.0.11) ");
 
@@ -297,18 +308,29 @@ public class HTML_Reader25 implements ActionListener {
                     new InputStreamReader(urlc.getInputStream())
             );
             String line;
+//            if(reader.readLine() == null){
+//                System.out.println("ts null");
+//            }
             while ( (line = reader.readLine()) != null ) {
+                System.out.println("line:" + line);
                 href(line, listOfLinks);
                 src(line, listOfLinks);
             }
             //adding all links with href and or src and or multiple to links arraylist
         }catch(Exception e){
-            //System.out.println("getLinks");
+            System.out.println("went into the catch with e = " + e);
             return null;
         }
-        String[] allLinks = new String[listOfLinks.size()];
+        ArrayList<String> list2 = new ArrayList<>();
         for(int i = 0; i < listOfLinks.size(); i++){
-            allLinks[i] = listOfLinks.get(i);
+            if(listOfLinks.get(i).contains("/wiki/") && !listOfLinks.get(i).contains(":")){
+                list2.add(listOfLinks.get(i));
+            }
+        }
+        System.out.println(list2.size());
+        String[] allLinks = new String[list2.size()];
+        for(int i = 0; i < list2.size(); i++){
+            allLinks[i] = list2.get(i);
         }
         return allLinks;
         //converting the links to an array to return
